@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>UML Diagram</title>
   </head>
   <script type = "module">
     import {SvgPlus} from "./4.js"
@@ -203,6 +203,7 @@
     let addTool = document.getElementById("add-tool");
     let mainTools = document.getElementById("main-tools");
     let showHideButton = document.getElementById("show-hide");
+    let header = document.getElementById("print-head");
     let editBox = null;
     let toolShown = true;
 
@@ -276,6 +277,8 @@
     }
 
     function Print(){
+      var title = prompt("Please enter a title", "UML Diagram");
+      if (title != null) header.innerHTML = title;
       let oldvb = uml.getAttribute("viewBox");
       uml.crop();
       window.print();
@@ -318,6 +321,7 @@
     #print-head {
       display: none;
       text-align: center;
+      margin-top: 3em;
     }
     @media print {
       body {
