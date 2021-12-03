@@ -1,6 +1,17 @@
 import {SvgPlus, Vector} from "../4.js"
 import {Box} from "./Box.js"
 
+function searchUp(target, classDef) {
+  let res = null;
+  while (target != null) {
+    if (SvgPlus.is(target, classDef)) {
+      res = target;
+      break;
+    }
+    target = target.parentNode;
+  }
+  return res;
+}
 
 class VEdge extends SvgPlus{
   #arrow_length = 6;
@@ -159,6 +170,7 @@ class VBoxesEditable extends VBoxes{
   #waiting = null;
   constructor(el = "svg"){
     super(el);
+
   }
 
   addEdge(boxa, boxb) {
@@ -202,31 +214,32 @@ class VBoxesEditable extends VBoxes{
   }
 
   ondblclick(e) {
-    let vbox = null;
-    for (let el of e.path) {
-      if (SvgPlus.is(el, VBox)) {
-        this.lastVBox = el;
-      }
+    let vbox = searchUp(e.target, VBox);
+    if (vbox != null) {
+      this.lastVBox = vbox;
     }
   }
+
   onmousedown(e) {
-    for (let el of e.path) {
-      if (SvgPlus.is(el, VBox)) {
-        this.selected = el;
-        if (this.lastVBox != null) {
-          this.lastVBox = el;
-        }
+    let vbox = searchUp(e.target, VBox);
+    if (vbox != null) {
+      this.selected = vbox;
+      if (this.lastVBox != null) {
+        this.lastVBox = vbox;
       }
     }
   }
   onmouseup(){
     this.selected = null;
+
   }
   onmouseleave(){
     this.selected = null;
+
   }
   onmousemove(e) {
     if (e.buttons == 1 && this.selected != null) {
+
       let movement = new Vector(e.movementX, e.movementY);
       let size = new Vector();
       let cbox = this.getBoundingClientRect();
@@ -375,4 +388,4 @@ class VBoxBorder extends SvgPlus {
   }
 }
 
-export {VBox, VBoxBorder, VBoxes, VBoxesEditable}
+export {VBox, VBoxBorder, VBoxes, VBoxesEditable, searchUp}

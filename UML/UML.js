@@ -1,5 +1,27 @@
 import {SvgPlus, Vector} from "../4.js"
-import {VBox, VBoxesEditable, VBoxBorder} from "./VBox.js"
+import {VBox, VBoxesEditable, VBoxBorder, searchUp} from "./VBox.js"
+let debug = new SvgPlus("debug");
+debug.innerHTML = "script"
+
+let jsonToHtml = (json, object) => {
+  for (let key in json) {
+    let kv = object.createChild("div", {style: {
+      display: "flex",
+      "justify-content": "space-between",
+    }});
+    kv.createChild("h5", {content: key});
+    let value = json[key];
+    if (typeof value === "object") {
+      // jsonToHtml(value, kv.createChild("div"))
+    }else {
+      kv.createChild("h5", {content: value+""})
+    }
+  }
+}
+debug.json = (json) => {
+  debug.innerHTML = ""
+  jsonToHtml(json, debug)
+}
 
 let umlData = {
   "CAnimal":{
@@ -213,11 +235,11 @@ class ContextMenu extends SvgPlus {
       display: "none"
     }
     document.body.addEventListener("contextmenu", (e) => {
-      for (let el of e.path) {
-        if (SvgPlus.is(el, VBox)) {
-          e.preventDefault();
-          this.show(el, e);
-        }
+      debug.innerHTML = "context"
+      let vbox = searchUp(e.target, VBox);
+      if (vbox != null) {
+        e.preventDefault();
+        this.show(vbox, e);
       }
     })
   }

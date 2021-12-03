@@ -7,10 +7,13 @@
   <script type = "module">
     import {SvgPlus} from "./4.js"
     import {UMLDiagram, umlData, VBox, ContextMenu} from "./UML/UML.js"
+
     let uml = new UMLDiagram("uml-diagram");
     uml.addUmlJSON(umlData);
-
     let ctx = new ContextMenu("context-menu");
+
+
+
     //
     // let desiredWidth = 1200;
     // function resizeToScreen(){
@@ -24,7 +27,11 @@
 
   <body>
     <h1 id = "print-head">UML Diagram</h1>
-    <div class = "rel">
+    <div id = "sorry-message">
+      Sorry it won't works
+      on this device :(
+    </div>
+    <div id = app class = "rel">
       <svg id = "uml-diagram" viewBox = "0 0 1200 1200">
         <defs>
           <marker id="association" viewBox="-1 -1 12 12" refX="10" refY="5"
@@ -52,8 +59,11 @@
           #uml-diagram {
             stroke-width: 2;
           }
-          .v-box {
+          .v-box text {
             user-select: none;
+            -webkit-touch-callout:none;
+            -ms-user-select:none;
+            -moz-user-select:none;
             font-family: monospace;
           }
           .v-box rect{
@@ -64,13 +74,16 @@
           #association, #inheritance, #aggrigation, #composition{
             stroke: black;
             fill: none;
+            stroke-dasharray: 5 0;
             stroke-linecap: round;
             stroke-linejoin: round;
           }
           #composition {
             fill: black;
+            stroke-dasharray: 5 0;
           }
           #inheritance, #aggrigation{
+            stroke-dasharray: 5 0;
             fill: white;
           }
           .inheritance .edge-path, .realisation .edge-path{
@@ -178,10 +191,12 @@
         </div>
       </div>
     </div>
-
+    <div id = debug></div>
   </body>
   <script>
+
     let text = document.getElementById("text-area");
+    let app = document.getElementById("app");
     let uml = document.getElementById("uml-diagram");
     let ctx = document.getElementById("context-menu");
     let editTool = document.getElementById("edit-tool");
@@ -191,6 +206,9 @@
     let editBox = null;
     let toolShown = true;
 
+    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+     app.style.setProperty("display", "none")
+    }
 
     function SetTool(tool){
       if (tool == "add") {
@@ -296,6 +314,7 @@
       display: flex;
       justify-content: space-between;
     }
+
     #print-head {
       display: none;
       text-align: center;
@@ -375,7 +394,34 @@
     #show-hide {
       margin-left: 1em;
     }
+    #sorry-message{
+      color: white;
+      position: fixed;
+      font-size: 3.5em;
+      text-align: center;
+      z-index: -1;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    #debug {
+      z-index: 3;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      overflow: scroll;
+      padding: 1em;
+    }
 
+    .v-box {
+      user-select: none; /* supported by Chrome and Opera */
+     -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+     -moz-user-select: none; /* Firefox */
+     -ms-user-select: none; /* Internet Explorer/Edge */
+      cursor: pointer;
+    }
     /* User control indicators */
     .v-edge .control {
       stroke-linecap: round;
@@ -389,6 +435,8 @@
     .selected rect {
       fill: #dce7ff;
     }
+
+    h5{margin: 0;}
   </style>
 
 </html>
