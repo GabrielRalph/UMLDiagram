@@ -90,9 +90,10 @@ class UMLDiagram extends VBoxesEditable {
 
   get center(){
     let vb = this.getAttribute("viewBox").split(" ");
-    let o = new Vector(vb);
-    let size = new Vector(vb, 2);
-    return o.add(size.div(2));
+    let ssize = new Vector(window.innerWidth, window.innerHeight);
+    let vsize = new Vector(vb, 2);
+    let vpoint = ssize.div(2).mul(vsize.x / ssize.x);
+    return vpoint;
   }
 
   addUmlBox(string) {
@@ -111,6 +112,7 @@ class UMLDiagram extends VBoxesEditable {
     let edge = super.add_edge(a, b);
     if (edge != null) {
       let i = 0;
+      edge.arrow_length = 7;
       edge.control1.onclick = () => {
         let c = edge.path.class;
         if (c.indexOf(" start-marker") == -1) {
@@ -131,6 +133,11 @@ class UMLDiagram extends VBoxesEditable {
         i = (i + 1) % atypes.length;
         let atype = atypes[i];
         edge.class = "v-edge " + atype;
+        if (atype == atypes[4] || atype == atypes[5]) {
+          edge.arrow_length = 14;
+        }else {
+          edge.arrow_length = 7;
+        }
       }
     }
     return edge;
