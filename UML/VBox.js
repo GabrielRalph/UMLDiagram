@@ -3,6 +3,9 @@ import {Box} from "./Box.js"
 
 
 class VEdge extends SvgPlus{
+  #arrow_length = 6;
+  #lastpa;
+  #lastpb;
   constructor(){
     super("g");
     this.class = "v-edge";
@@ -12,17 +15,35 @@ class VEdge extends SvgPlus{
     this.control3 = this.createChild("path", {class: "control"});
   }
 
-  update(pa, pb) {
+  set arrow_length(value){
+    if (typeof value === "string") value = parseFloat(value);
+    if (Number.isNaN(value)) value = 0;
+    if (typeof value === "number") {
+      this.#arrow_length = value;
+      this.update();
+    }
+  }
+  get arrow_length(){
+    return this.#arrow_length;
+  }
+
+  update(pa = this.#lastpa, pb = this.#lastpb) {
+    this.#lastpa = pa;
+    this.#lastpb = pb;
+    let arrow_length = this.arrow_length;
     if (pa && pb) {
       let anorm = pa.norm;
       let bnorm = pb.norm;
       pa = pa.point;
       pb = pb.point;
       let dist = pa.dist(pb);
-      let c1 = pa.add(anorm.mul(dist/3));
-      let c2 = pb.add(bnorm.mul(dist/3));
+
+      let p1 = pa.add(anorm.mul(arrow_length));
+      let p2 = pb.add(bnorm.mul(arrow_length));
+      let c1 = p1.add(anorm.mul(dist/3));
+      let c2 = p2.add(bnorm.mul(dist/3));
       this.path.props = {
-        d: `M${pa}C${c1},${c2},${pb}`
+        d: `M${pa}L${p1}C${c1},${c2},${p2}L${pb}`
       }
       this.control1.props = {
         d: `M${pa}L${pa}`
@@ -103,7 +124,7 @@ class VBoxes extends SvgPlus{
     return a in neighbors && b in neighbors[a];
   }
 
-  get anchors(){
+  get edge_anchors(){
     let neighbors = this.#neighbors;
     let lookup = this.#lookup;
 
@@ -121,7 +142,7 @@ class VBoxes extends SvgPlus{
   }
 
   update() {
-    let anchors = this.anchors
+    let anchors = this.edge_anchors
 
     for (let edge of this.#edges.getElementsByClassName("v-edge")) {
       let a = edge.boxa;
