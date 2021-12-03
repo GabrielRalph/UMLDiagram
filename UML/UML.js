@@ -128,9 +128,12 @@ class UMLDiagram extends SvgPlus {
   }
 
   saveSvg(name = "UML Diagram"){
+    let i = 0;
     for (let vbox of this.boxes.children) {
       if (SvgPlus.is(vbox, VBox)) {
         vbox.applyAttributes();
+        vbox.setAttribute("box-id", "BOX" + i)
+        i++;
       }
     }
     super.saveSvg(name);
@@ -176,8 +179,9 @@ class UMLDiagram extends SvgPlus {
   }
 
   clear(){
-    super.clear();
+    this.edges.clear();
     this.boxes.innerHTML = "";
+    clearBoxHASH();
   }
 
   crop(padding = 50){
@@ -210,7 +214,7 @@ class UMLDiagram extends SvgPlus {
   }
 
   removeUmlBox(umlBox) {
-    this.remove_box(umlBox.box);
+    this.edges.remove_box(umlBox.box);
     let parent = umlBox.parentNode;
     if (parent != null) {
       parent.removeChild(umlBox);

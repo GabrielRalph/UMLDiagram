@@ -364,7 +364,8 @@
     }
 
     async function Open(){
-      uml = await uml.openSvgTo(uml.parentNode);
+      let numl = await uml.openSvgTo(uml.parentNode);
+      if (numl != null) uml = numl;
     }
 
     let meta = false;
