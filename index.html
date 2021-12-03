@@ -21,6 +21,109 @@
     window.onresize = resizeToScreen;
     resizeToScreen();
   </script>
+  <style>
+    body {
+      margin: 0;
+      font-family: monospace;
+    }
+    .rel {
+      position: relative;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+    }
+    #print-head {
+      display: none;
+      text-align: center;
+    }
+    @media print {
+      .control {
+        display: none;
+      }
+      .tools {
+        display: none;
+      }
+      #print-head {
+        display: block;
+      }
+      #context-menu {
+        display: none;
+      }
+    }
+
+    /* Context menu */
+    #context-menu {
+      position: fixed;
+      top: 345px;
+      left: 234px;
+      border-radius: 1em;
+      border: 2px solid black;
+      background: white;
+    }
+    #context-menu div {
+      padding: 0.5em 1em;
+      user-select: none;
+      cursor: pointer;
+    }
+    #context-menu div:nth-of-type(n + 2) {
+      border-top: 2px solid #0003;
+    }
+
+
+     /* Tool panel */
+    .tools {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 1em;
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+    }
+    .tools .button {
+      padding: 0.3em 0.6em;
+      border: 2px solid black;
+      border-radius: 1em;
+      font-family: monospace;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tools textarea {
+      width: 25vw;
+      resize: vertical;
+      margin-bottom: 1em;
+      border-radius: 30px;
+      border: 2px solid black;
+      padding: 10px 25px;
+      min-height: 20vh;
+    }
+    .tools .hints {
+      width: 25vw;
+      margin-top: 1em;
+      display: inline-block;
+      opacity: 0.8;
+    }
+    #main-tools{
+      margin-top: 1em;
+    }
+    #show-hide {
+      margin-left: 1em;
+    }
+
+    /* User control indicators */
+    .v-edge .control {
+      stroke-linecap: round;
+      stroke-width: 12;
+      cursor: pointer;
+      stroke: #d313f54d;
+    }
+    .v-box rect {
+      transition: 0.3s cubic-bezier(0.4,0,1,0.6) fill;
+    }
+    .selected rect {
+      fill: #dce7ff;
+    }
+  </style>
 
   <body>
     <h1 id = "print-head">UML Diagram</h1>
@@ -278,107 +381,5 @@
       }
     }
   </script>
-  <style>
-    body {
-      margin: 0;
-      font-family: monospace;
-    }
-    .rel {
-      position: relative;
-    }
-    .row {
-      display: flex;
-      justify-content: space-between;
-    }
-    #print-head {
-      display: none;
-      text-align: center;
-    }
-    @media print {
-      .control {
-        display: none;
-      }
-      .tools {
-        display: none;
-      }
-      #print-head {
-        display: block;
-      }
-      #context-menu {
-        display: none;
-      }
-    }
 
-    /* Context menu */
-    #context-menu {
-      position: fixed;
-      top: 345px;
-      left: 234px;
-      border-radius: 1em;
-      border: 2px solid black;
-      background: white;
-    }
-    #context-menu div {
-      padding: 0.5em 1em;
-      user-select: none;
-      cursor: pointer;
-    }
-    #context-menu div:nth-of-type(n + 2) {
-      border-top: 2px solid #0003;
-    }
-
-
-     /* Tool panel */
-    .tools {
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 1em;
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-    }
-    .tools .button {
-      padding: 0.3em 0.6em;
-      border: 2px solid black;
-      border-radius: 1em;
-      font-family: monospace;
-      cursor: pointer;
-      user-select: none;
-    }
-    .tools textarea {
-      width: 25vw;
-      resize: vertical;
-      margin-bottom: 1em;
-      border-radius: 30px;
-      border: 2px solid black;
-      padding: 10px 25px;
-      min-height: 20vh;
-    }
-    .tools .hints {
-      width: 25vw;
-      margin-top: 1em;
-      display: inline-block;
-      opacity: 0.8;
-    }
-    #main-tools{
-      margin-top: 1em;
-    }
-    #show-hide {
-      margin-left: 1em;
-    }
-
-    /* User control indicators */
-    .v-edge .control {
-      stroke-linecap: round;
-      stroke-width: 12;
-      cursor: pointer;
-      stroke: #d313f54d;
-    }
-    .v-box rect {
-      transition: 0.3s cubic-bezier(0.4,0,1,0.6) fill;
-    }
-    .selected rect {
-      fill: #dce7ff;
-    }
-  </style>
 </html>
