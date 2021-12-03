@@ -9,20 +9,9 @@
     import {UMLDiagram, umlData, VBox, ContextMenu} from "./UML/UML.js"
 
     let uml = new UMLDiagram("uml-diagram");
-    uml.addUmlJSON(umlData);
+    // uml.addUmlJSON(umlData);
     let ctx = new ContextMenu("context-menu");
 
-
-
-    //
-    // let desiredWidth = 1200;
-    // function resizeToScreen(){
-    //   let w = window.innerWidth;
-    //   let h = window.innerHeight;
-    //   uml.props = {viewBox: `0 0 ${desiredWidth} ${h * desiredWidth / w}`}
-    // }
-    // window.onresize = resizeToScreen;
-    // resizeToScreen();
   </script>
 
   <body>
@@ -32,89 +21,182 @@
       on this device :(
     </div>
     <div id = app class = "rel">
-      <svg id = "uml-diagram" viewBox = "0 0 1200 1200">
-        <defs>
-          <marker id="association" viewBox="-1 -1 12 12" refX="10" refY="5"
-            markerWidth="6" markerHeight="6"
-            orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10" />
-          </marker>
-          <marker id="inheritance" viewBox="-1 -1 12 12" refX="10" refY="5"
-            markerWidth="6" markerHeight="6"
-            orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10 z" />
-          </marker>
-          <marker id="aggrigation" viewBox="-1 -1 22 12" refX="20" refY="5"
-            markerWidth="12" markerHeight="6"
-            orient="auto-start-reverse">
-            <path d="M 0 5 L 10 0 L 20 5 L 10 10 z" />
-          </marker>
-          <marker id="composition" viewBox="-1 -1 22 12" refX="20" refY="5"
-            markerWidth="12" markerHeight="6"
-            orient="auto-start-reverse">
-            <path d="M 0 5 L 10 0 L 20 5 L 10 10 z" />
-          </marker>
-        </defs>
-        <style>
-          #uml-diagram {
-            stroke-width: 2;
-          }
-          .v-box text {
-            user-select: none;
-            -webkit-touch-callout:none;
-            -ms-user-select:none;
-            -moz-user-select:none;
-            font-family: monospace;
-          }
-          .v-box rect{
-            fill: white;
-            stroke: black;
-          }
 
-          #association, #inheritance, #aggrigation, #composition{
-            stroke: black;
-            fill: none;
-            stroke-dasharray: 5 0;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-          }
-          #composition {
-            fill: black;
-            stroke-dasharray: 5 0;
-          }
-          #inheritance, #aggrigation{
-            stroke-dasharray: 5 0;
-            fill: white;
-          }
-          .inheritance .edge-path, .realisation .edge-path{
-            --marker: url("#inheritance");
-          }
-          .aggrigation .edge-path{
-            --marker: url("#aggrigation");
-          }
-          .composition .edge-path{
-            --marker: url("#composition");
-          }
-          .realisation .edge-path, .dependancy .edge-path {
-            stroke-dasharray: 5 5;
-          }
+      <div>
+        <svg id="uml-diagram" viewBox="0 0 1200 1200">
+          <defs>
+            <marker id="association" viewBox="-1 -1 12 12" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10">
+              </path>
+            </marker>
+            <marker id="inheritance" viewBox="-1 -1 12 12" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z">
+              </path>
+            </marker>
+            <marker id="aggrigation" viewBox="-1 -1 22 12" refX="20" refY="5" markerWidth="12" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 5 L 10 0 L 20 5 L 10 10 z">
+              </path>
+            </marker>
+            <marker id="composition" viewBox="-1 -1 22 12" refX="20" refY="5" markerWidth="12" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 5 L 10 0 L 20 5 L 10 10 z">
+              </path>
+            </marker>
+          </defs>
+          <style>
+            #uml-diagram {
+              stroke-width: 2;
+            }
+            .v-box text {
+              user-select: none;
+              -webkit-touch-callout:none;
+              -ms-user-select:none;
+              -moz-user-select:none;
+              font-family: monospace;
+            }
+            .v-box rect{
+              fill: white;
+              stroke: black;
+            }
+            #association, #inheritance, #aggrigation, #composition{
+              stroke: black;
+              fill: none;
+              stroke-dasharray: 5 0;
+              stroke-linecap: round;
+              stroke-linejoin: round;
+            }
+            #composition {
+              fill: black;
+              stroke-dasharray: 5 0;
+            }
+            #inheritance, #aggrigation{
+              stroke-dasharray: 5 0;
+              fill: white;
+            }
+            .inheritance .edge-path, .realisation .edge-path{
+              --marker: url("#inheritance");
+            }
+            .aggrigation .edge-path{
+              --marker: url("#aggrigation");
+            }
+            .composition .edge-path{
+              --marker: url("#composition");
+            }
+            .realisation .edge-path, .dependancy .edge-path {
+              stroke-dasharray: 5 5;
+            }
+            .edge-path {
+              --marker: url("#association");
+            }
+            .edge-path.start-marker {
+              marker-start: var(--marker);
+            }
+            .edge-path.end-marker {
+              marker-end: var(--marker);
+            }
+            .v-edge {
+              stroke: black;
+              fill: none;
+            }
+          </style>
+          <g class="v-boxes">
+          <g class="v-box" box-id="BOX0" transform="translate(600,623.86364)" pos="600,623.86364" height="109.37" radius="30" width="177">
+            <rect width="177" height="109.37" rx="30" x="-88.5" y="-54.685">
+            </rect>
+            <g transform="translate(-58.50053405761719, -0.8227272033691406)">
+              <text text-anchor="start" y="0em" style="font-size: 2em;">CAnimal</text>
+              <text text-anchor="start" y="1.7em"> + Walk() : void</text>
+              <text text-anchor="start" y="3.4em">
+              </text>
+            </g>
+          </g>
+          <g class="v-box" box-id="BOX1" transform="translate(143.18182,576.13636)" pos="143.18182,576.13636" height="175.67" radius="30" width="239.39">
+            <rect width="239.39" height="175.67" rx="30" x="-119.695" y="-87.835">
+            </rect>
+            <g transform="translate(-89.6950454711914, -33.97272872924805)">
+              <text text-anchor="start" y="0em" style="font-size: 2em;">CPerson</text>
+              <text text-anchor="start" y="1.7em"> + Feed(CPet pet) : void</text>
+              <text text-anchor="start" y="3.4em"> + WritePoetry() : void</text>
+              <text text-anchor="start" y="5.1em">
+              </text>
+              <text text-anchor="start" y="6.8em"> - feeds: list&lt;CPet&gt;</text>
+            </g>
+          </g>
+          <g class="v-box" box-id="BOX2" transform="translate(634.09091,247.15909)" pos="634.09091,247.15909" height="109.37" radius="30" width="177">
+            <rect width="177" height="109.37" rx="30" x="-88.5" y="-54.685">
+            </rect>
+            <g transform="translate(-58.50053405761719, -0.8227272033691406)">
+              <text text-anchor="start" y="0em" style="font-size: 2em;">CPet</text>
+              <text text-anchor="start" y="1.7em"> + Feed() : void</text>
+              <text text-anchor="start" y="3.4em">
+              </text>
+            </g>
+          </g>
+          <g class="v-box" box-id="BOX3" transform="translate(421.02273,506.25)" pos="421.02273,506.25" height="109.37" radius="30" width="231.6">
+            <rect width="231.6" height="109.37" rx="30" x="-115.8" y="-54.685">
+            </rect>
+            <g transform="translate(-85.79989624023438, -0.8227272033691406)">
+              <text text-anchor="start" y="0em" style="font-size: 2em;">CDog</text>
+              <text text-anchor="start" y="1.7em"> + EatHomework() : void</text>
+              <text text-anchor="start" y="3.4em">
+              </text>
+            </g>
+          </g>
+          <g class="v-box" box-id="BOX4" transform="translate(388.63636,177.27273)" pos="388.63636,177.27273" height="109.37" radius="30" width="231.6">
+            <rect width="231.6" height="109.37" rx="30" x="-115.8" y="-54.685">
+            </rect>
+            <g transform="translate(-85.79989624023438, -0.8227272033691406)">
+              <text text-anchor="start" y="0em" style="font-size: 2em;">CCat</text>
+              <text text-anchor="start" y="1.7em"> + DoSomething() : void</text>
+              <text text-anchor="start" y="3.4em">
+              </text>
+            </g>
+          </g>
+          </g>
+          <g class="v-edges">
+          <g class="v-edge inheritance" box-a="BOX4" box-b="BOX1">
+            <path class="edge-path start-marker" d="M281.62316,223.17093L276.67341,228.12068C211.78517,293.00893,323.92801,427.25016,259.03977,492.13841L254.09002,497.08816">
+            </path>
+            <path class="control" d="M281.62316,223.17093L281.62316,223.17093">
+            </path>
+            <path class="control" d="M254.09002,497.08816L254.09002,497.08816">
+            </path>
+            <path class="control" d="M267.85654,360.12946L267.85654,360.12946">
+            </path>
+          </g>
+          <g class="v-edge" box-a="BOX3" box-b="BOX2">
+            <path class="edge-path end-marker start-marker" d="M528.03593,460.3518L532.98568,455.40205C572.90319,415.48454,509.51044,337.92455,549.42796,298.00704L554.3777,293.05729">
+            </path>
+            <path class="control" d="M528.03593,460.3518L528.03593,460.3518">
+            </path>
+            <path class="control" d="M554.3777,293.05729L554.3777,293.05729">
+            </path>
+            <path class="control" d="M541.20679,376.70456L541.20679,376.70456">
+            </path>
+          </g>
+          <g class="v-edge inheritance" box-a="BOX1" box-b="BOX0">
+            <path class="edge-path end-marker" d="M262.87682,576.13636L269.87682,576.13636C354.2644,576.13636,420.11241,623.86364,504.5,623.86364L511.5,623.86364">
+            </path>
+            <path class="control" d="M262.87682,576.13636L262.87682,576.13636">
+            </path>
+            <path class="control" d="M511.5,623.86364L511.5,623.86364">
+            </path>
+            <path class="control" d="M387.18842,600L387.18842,600">
+            </path>
+          </g>
+          <g class="v-edge aggrigation" box-a="BOX4" box-b="BOX3">
+            <path class="edge-path end-marker" d="M388.63636,231.95773L388.63636,245.95773C388.63636,319.9519,421.02273,363.57083,421.02273,437.565L421.02273,451.565">
+            </path>
+            <path class="control" d="M388.63636,231.95773L388.63636,231.95773">
+            </path>
+            <path class="control" d="M421.02273,451.565L421.02273,451.565">
+            </path>
+            <path class="control" d="M404.82953,341.76141L404.82953,341.76141">
+            </path>
+          </g>
+          </g>
+        </svg>
+      </div>
 
-          .edge-path {
-            --marker: url("#association");
-          }
-          .edge-path.start-marker {
-            marker-start: var(--marker);
-          }
-          .edge-path.end-marker {
-            marker-end: var(--marker);
-          }
-
-          .v-edge {
-            stroke: black;
-            fill: none;
-          }
-        </style>
-      </svg>
 
       <div id = "context-menu" style = "display: none">
         <div onclick = "Edit()">
@@ -123,6 +205,9 @@
         <div onclick = "Remove(event)">
           Remove
         </div>
+        <div onclick = "SaveSvg()">
+          Save SVG
+        </div>
       </div>
 
       <div class = "tools">
@@ -130,6 +215,10 @@
           <div onclick = "Print()" class = "button">
             Print
           </div>
+          <div onclick = "Clear()" class = "button">
+            Clear
+          </div>
+
           <div id = "show-hide" onclick = "ToggleShow(event)" class = "button">
             Hide
           </div>
@@ -138,9 +227,11 @@
           <textarea id = "text-area"></textarea>
           <div id = "add-tool" class = "row">
             <div onclick = "Add()" class = "button">
-              Add
+              +
             </div>
-
+            <div onclick = "Open()" class = "button">
+              Open SVG
+            </div>
           </div>
           <div id = "edit-tool" class = "row">
             <div onclick = "Save()" class = "button">
@@ -264,6 +355,18 @@
       SetTool("add");
     }
 
+    function Clear(){
+      uml.clear();
+    }
+
+    function SaveSvg(){
+      uml.saveSvg();
+    }
+
+    async function Open(){
+      uml = await uml.openSvgTo(uml.parentNode);
+    }
+
     let meta = false;
     window.onkeydown = (e) => {
       if (e.key == "Meta") meta = true;
@@ -370,6 +473,9 @@
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
     }
+    .row .button:nth-of-type(n + 2) {
+      margin-left: 1em;
+    }
     .tools .button {
       padding: 0.3em 0.6em;
       border: 2px solid black;
@@ -396,9 +502,7 @@
     #main-tools{
       margin-top: 1em;
     }
-    #show-hide {
-      margin-left: 1em;
-    }
+
     #sorry-message{
       color: white;
       position: fixed;

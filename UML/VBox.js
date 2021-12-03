@@ -1,5 +1,5 @@
 import {SvgPlus, Vector} from "../4.js"
-import {Box} from "./Box.js"
+import {Box, clearBoxHASH} from "./Box.js"
 
 function searchUp(target, classDef) {
   let res = null;
@@ -17,6 +17,8 @@ class VEdge extends SvgPlus{
   #arrow_length = 6;
   #lastpa;
   #lastpb;
+  #boxa;
+  #boxb;
   constructor(){
     super("g");
     this.class = "v-edge";
@@ -24,6 +26,22 @@ class VEdge extends SvgPlus{
     this.control1 = this.createChild("path", {class: "control"});
     this.control2 = this.createChild("path", {class: "control"});
     this.control3 = this.createChild("path", {class: "control"});
+  }
+
+  set boxa(box){
+    this.#boxa = box;
+    this.setAttribute("box-a", ""+ box)
+  }
+  get boxa(){
+    return this.#boxa;
+  }
+
+  set boxb(box){
+    this.#boxb = box;
+    this.setAttribute("box-b", ""+ box)
+  }
+  get boxb(){
+    return this.#boxb;
   }
 
   set arrow_length(value){
@@ -73,14 +91,50 @@ class VEdge extends SvgPlus{
   }
 }
 
-class VBoxes extends SvgPlus{
+class VEdges extends SvgPlus{
   #edges;
   #neighbors = {}
   #lookup = {}
-  constructor(el = "svg"){
+  constructor(el = "g"){
     super(el);
-    this.#edges = this.createChild("g");
-    this.#edges.class = "v-edges"
+    this.class = "v-edges"
+  }
+
+  loadEdges(){
+    let edges = [];
+    for (let edge of this.children) {
+      let a = edge.getAttribute("box-a");
+      let b = edge.getAttribute("box-b");
+      let cname = edge.getAttribute("class");
+      let path = edge.children[0];
+      if (path) path = path.getAttribute("class");
+      if (cname.indexOf("v-edge") == -1) cname = "v-edge " + cname;
+
+      if (a && b) {
+        edges.push({
+          a: a,
+          b: b,
+          class: cname,
+          pathClass: path,
+        })
+      }
+    }
+    this.innerHTML = ""
+    for (let edge of edges) {
+      let edgeEl = this.add_edge(edge.a, edge.b);
+      edgeEl.class = edge.class;
+      edgeEl.path.class = edge.pathClass;
+    }
+  }
+
+  clear(){
+    this.#neighbors = {};
+    this.#lookup = {};
+    this.innerHTML = "";
+  }
+
+  add_box_ref(id, box) {
+    this.#lookup[id] = box;
   }
 
   remove_box(box) {
@@ -98,7 +152,7 @@ class VBoxes extends SvgPlus{
   add_edge(a, b){
     let edge = null;
     if (!this.contains_edge(a, b)) {
-      edge = this.#edges.createChild(VEdge);
+      edge = this.createChild(VEdge);
 
       edge.boxa = a;
       edge.boxb = b;
@@ -107,11 +161,14 @@ class VBoxes extends SvgPlus{
       let lookup = this.#lookup;
       if (!(a in neighbors)) neighbors[a] = {};
       if (!(b in neighbors)) neighbors[b] = {};
-      lookup[a] = a;
-      lookup[b] = b;
+      if (a instanceof Box) lookup[a] = a;
+      if (b instanceof Box) lookup[b] = b;
       neighbors[a][b] = edge;
       neighbors[b][a] = edge;
       this.update();
+    }
+    if (edge != null && this.onedge instanceof Function) {
+      this.onedge(edge);
     }
     return edge;
   }
@@ -125,7 +182,7 @@ class VBoxes extends SvgPlus{
       delete neighbors[b][a];
       if (Object.keys(neighbors[a]).length == 0) delete neighbors[a];
       if (Object.keys(neighbors[b]).length == 0) delete neighbors[b];
-      this.#edges.removeChild(edge);
+      this.removeChild(edge);
       this.update();
     }
   }
@@ -155,7 +212,7 @@ class VBoxes extends SvgPlus{
   update() {
     let anchors = this.edge_anchors
 
-    for (let edge of this.#edges.getElementsByClassName("v-edge")) {
+    for (let edge of this.getElementsByClassName("v-edge")) {
       let a = edge.boxa;
       let b = edge.boxb;
       let v1 = anchors[a][b];
@@ -165,25 +222,36 @@ class VBoxes extends SvgPlus{
   }
 }
 
-class VBoxesEditable extends VBoxes{
+class VControls {
   #lastVBox = null;
   #waiting = null;
-  constructor(el = "svg"){
-    super(el);
 
+  constructor(edges, viewBox){
+    this.edges = edges;
+    this.viewBox = viewBox;
+    let ecbs = ["dblclick","mousedown","mouseup","mouseleave","mousemove"];
+    for (let ecb of ecbs) viewBox.addEventListener(ecb, (e) => {
+      this["on" + ecb](e);
+    });
   }
 
   addEdge(boxa, boxb) {
+    let edge = null;
     if (SvgPlus.is(boxa, VBox) && SvgPlus.is(boxb, VBox)) {
-      if (this.contains_edge(boxa.box, boxb.box)) {
-        this.remove_edge(boxa.box, boxb.box);
+      if (this.edges.contains_edge(boxa.box, boxb.box)) {
+        this.edges.remove_edge(boxa.box, boxb.box);
       }else {
-        this.add_edge(boxa.box, boxb.box);
+        edge = this.edges.add_edge(boxa.box, boxb.box);
+        boxa.addEventListener("change", () => {this.edges.update()})
+        boxb.addEventListener("change", () => {this.edges.update()})
       }
-      boxa.addEventListener("change", () => {this.update()})
-      boxb.addEventListener("change", () => {this.update()})
+    }
+    if (edge != null && this.onedge instanceof Function) {
+      this.onedge(edge);
     }
   }
+
+
 
   set lastVBox(vbox){
     let lastVBox = this.lastVBox;
@@ -219,7 +287,6 @@ class VBoxesEditable extends VBoxes{
       this.lastVBox = vbox;
     }
   }
-
   onmousedown(e) {
     let vbox = searchUp(e.target, VBox);
     if (vbox != null) {
@@ -239,11 +306,11 @@ class VBoxesEditable extends VBoxes{
   }
   onmousemove(e) {
     if (e.buttons == 1 && this.selected != null) {
-
+      let vb = this.viewBox;
       let movement = new Vector(e.movementX, e.movementY);
       let size = new Vector();
-      let cbox = this.getBoundingClientRect();
-      let vbsize = new Vector(this.getAttribute("viewBox").split(" "), 2);
+      let cbox = vb.getBoundingClientRect();
+      let vbsize = new Vector(vb.getAttribute("viewBox").split(" "), 2);
       let cbsize = new Vector(cbox.width, cbox.height);
       movement = movement.mul(vbsize).div(cbsize);
       let pos = this.selected.pos.add(movement);
@@ -257,11 +324,12 @@ class VBox extends SvgPlus {
   #width = 0;
   #height = 0;
   #radius = 0;
-  box = null;
+  #box = null;
   constructor(el = "g"){
     super(el);
     this.class = "v-box";
-    this.box = new Box;
+    this.#box = new Box;
+    this.setAttribute("box-id", this.box+"")
 
     let props = Object.getOwnPropertyDescriptors(VBox.prototype);
     let setters = [];
@@ -272,18 +340,44 @@ class VBox extends SvgPlus {
         this[propName] = this.getAttribute(propName);
       }
     }
-    this.watch({
-      attributeFilter: setters,
-      attributes: true,
-    })
+
+    this.applyAttributes = () => {
+      let props = {
+        "box-id": ""+this.box
+      }
+      for (let setter of setters) {
+        let value = this[setter];
+        if (typeof value == "number") {
+          value = Math.round(value*100)/100;
+        }
+        props[setter] = value;
+      }
+      this.props = props;
+    }
+
+    this.getAllAttributes = () => {
+      for (let setter of setters) {
+        let value = this.getAttribute(setter);
+        if (setter == "pos" && value != null) {
+          value = new Vector(value.split(","));
+        }
+        this[setter] = value;
+      }
+    }
+    this.getAllAttributes();
+    // console.log(this.pos);
   }
 
-  onmutation(m){
-    for (let record of m) {
-      let name = record.attributeName
-      this[name] = this.getAttribute(name);
-    }
+  get box(){
+    return this.#box;
   }
+
+  // onmutation(m){
+  //   for (let record of m) {
+  //     let name = record.attributeName
+  //     this[name] = this.getAttribute(name);
+  //   }
+  // }
 
   runUpdate(){
     let pos = this.pos;
@@ -388,4 +482,5 @@ class VBoxBorder extends SvgPlus {
   }
 }
 
-export {VBox, VBoxBorder, VBoxes, VBoxesEditable, searchUp}
+
+export {VBox, VBoxBorder, VEdges, VControls, searchUp, clearBoxHASH}

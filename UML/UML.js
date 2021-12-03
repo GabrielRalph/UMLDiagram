@@ -1,5 +1,5 @@
 import {SvgPlus, Vector} from "../4.js"
-import {VBox, VBoxesEditable, VBoxBorder, searchUp} from "./VBox.js"
+import {VBox, VEdges, VControls, VBoxBorder, searchUp, clearBoxHASH} from "./VBox.js"
 
 let debug = new SvgPlus("debug");
 debug.innerHTML = "script"
@@ -90,21 +90,102 @@ let atypes = [
   "composition"
 ]
 
-class UMLDiagram extends VBoxesEditable {
+class UMLDiagram extends SvgPlus {
+  constructor(el = "svg") {
+    super(el);
+    clearBoxHASH();
+    let edges = this.getElementsByClassName("v-edges")[0];
+    let boxes = this.getElementsByClassName("v-boxes")[0];
+
+    if (!boxes) {
+      boxes = this.createChild("g", {class: "v-boxes"});
+    } else if (SvgPlus.is(boxes, SvgPlus)) {
+      boxes = new SvgPlus(boxes);
+    }
+
+    if (!edges) {
+      edges = this.createChild(VEdges);
+    } else if (!SvgPlus.is(edges, VEdges)) {
+      edges = new VEdges(edges);
+    }
+    edges.onedge = (e) => {this.onedge(e)};
+    this.controls = new VControls(edges, this);
+
+    this.boxes = boxes;
+    this.edges = edges;
+    this.loadBoxes(boxes);
+    this.edges.loadEdges();
+  }
+
+  loadBoxes(boxes){
+    for (let box of boxes.children) {
+      if (!SvgPlus.is(box, VUmlBox)) {
+        let vbox = new VUmlBox(box);
+        vbox.onchange = () => {this.edges.update();}
+        this.edges.add_box_ref(vbox.box+"", vbox.box)
+      }
+    }
+  }
+
+  saveSvg(name = "UML Diagram"){
+    for (let vbox of this.boxes.children) {
+      if (SvgPlus.is(vbox, VBox)) {
+        vbox.applyAttributes();
+      }
+    }
+    super.saveSvg(name);
+  }
+  async openSvg(){
+    let input = new SvgPlus("input");
+    input.props = {
+      type: "file"
+    }
+    input.click();
+    return new Promise((resolve, reject) => {
+      input.onchange = () => {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try{
+            let svg = SvgPlus.parseSVGString(evt.target.result);
+            let uml = new UMLDiagram(svg);
+            resolve(evt.target.result)
+          } catch(e) {
+            console.log(e);
+            resolve(null)
+          }
+        };
+        reader.readAsText(input.files[0]);
+      }
+    });
+  }
+
+  async openSvgTo(to){
+    let uml = await this.openSvg();
+    if (uml != null) {
+      to.innerHTML = uml;
+      return new UMLDiagram(to.children[0]);
+    } else {
+      alert("Something went wrong reading the file.")
+    }
+  }
+
   addUmlJSON(data){
-    this.boxes = this.createChild("g");
-    this.prepend(this.boxes);
     for (let name in data) {
       this.addUmlBox(umlJSONToString(data[name], name))
     }
   }
 
-  crop(padding = 25){
+  clear(){
+    super.clear();
+    this.boxes.innerHTML = "";
+  }
+
+  crop(padding = 50){
     let bbox = this.getBBox();
     let o = new Vector(bbox);
     let size = new Vector(bbox.width, bbox.height);
     let px = padding;
-    let ar = 240/210;
+    let ar = 24/21;
     if (size.y / size.x > ar) {
       px = (size.y / ar - size.x)/2;
     }
@@ -136,49 +217,67 @@ class UMLDiagram extends VBoxesEditable {
     }
   }
 
-  add_edge(a, b) {
-    let edge = super.add_edge(a, b);
-    if (edge != null) {
-      let i = 0;
-      edge.arrow_length = 7;
-      edge.control1.onclick = () => {
-        let c = edge.path.class;
-        if (c.indexOf(" start-marker") == -1) {
-          edge.path.class += " start-marker"
-        }else {
-          edge.path.class = c.replace(" start-marker", "")
-        }
-      }
-      edge.control2.onclick = () => {
-        let c = edge.path.class;
-        if (c.indexOf(" end-marker") == -1) {
-          edge.path.class += " end-marker"
-        }else {
-          edge.path.class = c.replace(" end-marker", "")
-        }
-      }
-      edge.control3.onclick = () => {
-        i = (i + 1) % atypes.length;
-        let atype = atypes[i];
-        edge.class = "v-edge " + atype;
-        if (atype == atypes[4] || atype == atypes[5]) {
-          edge.arrow_length = 14;
-        }else {
-          edge.arrow_length = 7;
-        }
+  onedge(edge) {
+    let i = 0;
+    edge.arrow_length = 7;
+    edge.control1.onclick = () => {
+      let c = edge.path.class;
+      if (c.indexOf(" start-marker") == -1) {
+        edge.path.class += " start-marker"
+      }else {
+        edge.path.class = c.replace(" start-marker", "")
       }
     }
-    return edge;
+    edge.control2.onclick = () => {
+      let c = edge.path.class;
+      if (c.indexOf(" end-marker") == -1) {
+        edge.path.class += " end-marker"
+      }else {
+        edge.path.class = c.replace(" end-marker", "")
+      }
+    }
+
+    edge.control3.onclick = () => {
+      i = (i + 1) % atypes.length;
+      let atype = atypes[i];
+      edge.class = "v-edge " + atype;
+      if (atype == atypes[4] || atype == atypes[5]) {
+        edge.arrow_length = 14;
+      }else {
+        edge.arrow_length = 7;
+      }
+    }
   }
 }
 
 class VUmlBox extends VBox {
   constructor(string, center){
-    super("g");
-    this.innerHTML = '<rect></rect>';
+    if (string instanceof SVGGElement) {
+      super(string)
+    }else {
+      super("g");
+    }
+
+    if (this.children.length > 0) {
+      if (this.children.length > 1) {
+        this.text = this.children[1];
+        let value = ""
+        for (let te of this.text.children) {
+          value += te.innerHTML + "\n"
+        }
+        value = value.replace(/[\s]*$/, "")
+        value = value.replace("&gt;", ">").replace("&lt;", "<");
+        this.value = value;
+      }
+    } else {
+      this.innerHTML = '<rect></rect>';
+    }
+
     new VBoxBorder(this.children[0]);
-    this.make(string);
-    this.pos = center;
+    if (typeof string === "string") {
+      this.make(string);
+      this.pos = center;
+    }
   }
 
   async make(string, padding = 30){
@@ -201,6 +300,21 @@ class TextLines extends SvgPlus {
   constructor(el = "g") {
     super(el);
   }
+
+  async updateSize(){
+    return new Promise((resolve, reject) => {
+      window.requestAnimationFrame(() => {
+        let bbox = this.getBBox();
+        this.width = bbox.width;
+        this.height = bbox.height;
+        this.props = {
+          transform: `translate(${-bbox.width/2 - bbox.x}, ${-bbox.height/2 - bbox.y})`
+        }
+        resolve();
+      })
+    });
+  }
+
   async makeLines(string, title = true){
     this.innerHTML = ""
     string = string.replace("<", "&lt;");
@@ -219,17 +333,7 @@ class TextLines extends SvgPlus {
         style: style
       })
     }
-    return new Promise((resolve, reject) => {
-      window.requestAnimationFrame(() => {
-        let bbox = this.getBBox();
-        this.width = bbox.width;
-        this.height = bbox.height;
-        this.props = {
-          transform: `translate(${-bbox.width/2 - bbox.x}, ${-bbox.height/2 - bbox.y})`
-        }
-        resolve();
-      })
-    });
+    await this.updateSize();
   }
 }
 

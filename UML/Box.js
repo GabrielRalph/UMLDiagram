@@ -175,6 +175,8 @@ class Box {
   }
 }
 
+function clearBoxHASH(){
+  BoxHASH = 0;
+}
 
-
-export {Box}
+export {Box, clearBoxHASH}
