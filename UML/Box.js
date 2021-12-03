@@ -1,15 +1,37 @@
 import {Vector} from "../4.js"
 let BoxHASH = 0;
+let BoxHASHTable = {};
+
+
+function clearBoxHASH(){
+  BoxHASHTable = {};
+  BoxHASH = 0;
+}
+
+function addBoxHASH(id){
+  let h = null
+  if (id == null){
+    h ="BOX" + BoxHASH;
+    BoxHASH++;
+  }else if (id in BoxHASHTable) {
+    throw "err";
+  }else {
+    let num = parseInt(id.replace("BOX", ""));
+    if (num + 1 > BoxHASH)  BoxHASH = num + 1;
+    h = id;
+  }
+  BoxHASHTable[h] = true;
+  return h;
+}
 
 class Box {
   #hashid;
-  constructor(width = 0, height = 0, pos = new Vector, radius = 0){
-    this.height = height;
-    this.width = width;
-    this.pos = pos;
-    this.radius = radius;
-    this.#hashid = "BOX" + BoxHASH;
-    BoxHASH++;
+  constructor(id = null){
+    this.height = 0;
+    this.width = 0;
+    this.pos = 0;
+    this.radius = 0;
+    this.#hashid = addBoxHASH(id)
   }
 
   toString(){
@@ -173,10 +195,6 @@ class Box {
     }
     return corners;
   }
-}
-
-function clearBoxHASH(){
-  BoxHASH = 0;
 }
 
 export {Box, clearBoxHASH}

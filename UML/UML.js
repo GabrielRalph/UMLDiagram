@@ -128,12 +128,9 @@ class UMLDiagram extends SvgPlus {
   }
 
   saveSvg(name = "UML Diagram"){
-    let i = 0;
     for (let vbox of this.boxes.children) {
       if (SvgPlus.is(vbox, VBox)) {
         vbox.applyAttributes();
-        vbox.setAttribute("box-id", "BOX" + i)
-        i++;
       }
     }
     super.saveSvg(name);
@@ -150,7 +147,6 @@ class UMLDiagram extends SvgPlus {
         reader.onload = (evt) => {
           try{
             let svg = SvgPlus.parseSVGString(evt.target.result);
-            let uml = new UMLDiagram(svg);
             resolve(evt.target.result)
           } catch(e) {
             console.log(e);
@@ -166,9 +162,16 @@ class UMLDiagram extends SvgPlus {
     let uml = await this.openSvg();
     if (uml != null) {
       to.innerHTML = uml;
-      return new UMLDiagram(to.children[0]);
+      try{
+        let nel = new UMLDiagram(to.children[0]);
+        return nel;
+      } catch(e) {
+        to.innerHTML = "";
+        return null
+      }
     } else {
       alert("Something went wrong reading the file.")
+      return null;
     }
   }
 

@@ -328,7 +328,8 @@ class VBox extends SvgPlus {
   constructor(el = "g"){
     super(el);
     this.class = "v-box";
-    this.#box = new Box;
+    let id = this.getAttribute("box-id");
+    this.#box = new Box(id);
     this.setAttribute("box-id", this.box+"")
 
     let props = Object.getOwnPropertyDescriptors(VBox.prototype);
