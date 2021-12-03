@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <script type = "module">
+    import {SvgPlus} from "./4.js"
+    import {UMLDiagram, umlData, VBox, ContextMenu} from "./UML/UML.js"
+    let uml = new UMLDiagram("uml-diagram");
+    uml.addUmlJSON(umlData);
+
+    let ctx = new ContextMenu("context-menu");
+
+    let desiredWidth = 1200;
+    function resizeToScreen(){
+      let w = window.innerWidth;
+      let h = window.innerHeight;
+      uml.props = {viewBox: `0 0 ${desiredWidth} ${h * desiredWidth / w}`}
+    }
+    window.onresize = resizeToScreen;
+    resizeToScreen();
+  </script>
+
+  <body>
+    <h1 id = "print-head">UML Diagram</h1>
+    <div class = "rel">
+      <svg id = "uml-diagram" viewBox = "0 0 1200 800">
+        <defs>
+          <marker id="association" viewBox="-1 -1 12 12" refX="10" refY="5"
+            markerWidth="6" markerHeight="6"
+            orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10" />
+          </marker>
+          <marker id="inheritance" viewBox="-1 -1 12 12" refX="10" refY="5"
+            markerWidth="6" markerHeight="6"
+            orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" />
+          </marker>
+          <marker id="aggrigation" viewBox="-1 -1 22 12" refX="10" refY="5"
+            markerWidth="12" markerHeight="6"
+            orient="auto-start-reverse">
+            <path d="M 0 5 L 10 0 L 20 5 L 10 10 z" />
+          </marker>
+          <marker id="composition" viewBox="-1 -1 22 12" refX="10" refY="5"
+            markerWidth="12" markerHeight="6"
+            orient="auto-start-reverse">
+            <path d="M 0 5 L 10 0 L 20 5 L 10 10 z" />
+          </marker>
+        </defs>
+        <style>
+          #uml-diagram {
+            stroke-width: 2;
+          }
+          .v-box {
+            user-select: none;
+            font-family: monospace;
+          }
+          .v-box rect{
+            fill: white;
+            stroke: black;
+          }
+
+          #association, #inheritance, #aggrigation, #composition{
+            stroke: black;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+          }
+          #composition {
+            fill: black;
+          }
+          #inheritance, #aggrigation{
+            fill: white;
+          }
+          .inheritance .edge-path, .realisation .edge-path{
+            --marker: url("#inheritance");
+          }
+          .aggrigation .edge-path{
+            --marker: url("#aggrigation");
+          }
+          .composition .edge-path{
+            --marker: url("#composition");
+          }
+          .realisation .edge-path, .dependancy .edge-path {
+            stroke-dasharray: 5 5;
+          }
+
+          .edge-path {
+            --marker: url("#association");
+          }
+          .edge-path.start-marker {
+            marker-start: var(--marker);
+          }
+          .edge-path.end-marker {
+            marker-end: var(--marker);
+          }
+
+          .v-edge {
+            stroke: black;
+            fill: none;
+          }
+        </style>
+      </svg>
+      <div id = "context-menu">
+        <div onclick = "Edit()">
+          Edit
+        </div>
+        <div onclick = "Remove(event)">
+          Remove
+        </div>
+      </div>
+      <div class = "tools">
+        <div class = "row">
+          <div onclick = "Print()" class = "button">
+            Print
+          </div>
+          <div id = "show-hide" onclick = "ToggleShow(event)" class = "button">
+            Hide
+          </div>
+        </div>
+        <div id = "main-tools">
+          <textarea id = "text-area"></textarea>
+          <div id = "add-tool" class = "row">
+            <div onclick = "Add()" class = "button">
+              Add
+            </div>
+
+          </div>
+          <div id = "edit-tool" class = "row">
+            <div onclick = "Save()" class = "button">
+              Apply
+            </div>
+            <div onclick = "Cancel()" class = "button">
+              Cancel
+            </div>
+          </div>
+          <div ondblclick = "HideHints()" class = "hints">
+            <b>Add Boxes</b>, to add a box, enter it's content using the text area above.
+            Click add to create a new box.<br /><br />
+
+            <b>Edit/Remove Boxes</b>, right click on the box you would
+            like to edit/remove. Edit the boxes content using the
+            text area above, then click apply to save changes. <br /><br />
+
+            <b>Add/Remove Edges</b>, to add/remove an edge double click on a box you want to connect.
+            Once the box highlights, click on another box to connect them. <br /><br />
+
+            <b>Edge Arrow Heads</b>, to add/remove an arrow head click on the purple control point
+            where you would to add/remove an arrow head.<br /><br />
+
+            <b>Edge Types</b>, to change the edge type, click the center control
+            point on the edge to toggle through the follwing types:
+            <ul>
+              <li>
+                association (knows a)
+              </li>
+              <li>
+                inheritance (is a)
+              </li>
+              <li>
+                realisation (implements a)
+              </li>
+              <li>
+                dependancy (uses a)
+              </li>
+              <li>
+                aggrigation (has a, doesn't own)
+              </li>
+              <li>
+                composition (has a, owns)
+              </li>
+            </ul>
+            <i>Double click hints to hide</i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+  <script>
+    let text = document.getElementById("text-area");
+    let uml = document.getElementById("uml-diagram");
+    let ctx = document.getElementById("context-menu");
+    let editTool = document.getElementById("edit-tool");
+    let addTool = document.getElementById("add-tool");
+    let mainTools = document.getElementById("main-tools");
+    let showHideButton = document.getElementById("show-hide");
+    let editBox = null;
+    let toolShown = true;
+
+
+    function SetTool(tool){
+      if (tool == "add") {
+        editTool.style.setProperty("display", "none");
+        addTool.style.setProperty("display", "");
+        editBox = null;
+      } else {
+        editTool.style.setProperty("display", "");
+        addTool.style.setProperty("display", "none");
+      }
+    }
+    SetTool("add")
+
+    function Add(){
+      if (text.value.length > 2) {
+        uml.addUmlBox(text.value);
+        text.value = ""
+      }
+    }
+
+    function ContextMenu(e) {
+      console.log(e);
+    }
+
+    function Remove(e){
+      if (ctx.selected != null) {
+        uml.removeUmlBox(ctx.selected);
+        ctx.hide();
+      }
+    }
+
+    function Edit(){
+      if (ctx.selected != null) {
+        if (!toolShown) ToggleShow();
+        editBox = ctx.selected
+        text.value = editBox.value;
+        SetTool("edit");
+      }
+      ctx.hide();
+    }
+
+    function Save(){
+      if (editBox != null) {
+        editBox.make(text.value);
+      }
+      text.value = "";
+      SetTool("add");
+    }
+
+    function Cancel(){
+      text.value = "";
+      SetTool("add");
+    }
+
+    function Print(){
+      window.print();
+    }
+
+    function ToggleShow(e){
+      if (toolShown) {
+        mainTools.style.setProperty("display", "none");
+        showHideButton.innerHTML = "Show";
+        toolShown = false;
+      } else {
+        mainTools.style.setProperty("display", "");
+        showHideButton.innerHTML = "Hide";
+        toolShown = true;
+      }
+    }
+
+    function HideHints(){
+      console.log('xx');
+      for (let el of document.getElementsByClassName("hints")) {
+        el.style.setProperty("display", "none");
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      font-family: monospace;
+    }
+    .rel {
+      position: relative;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+    }
+    #print-head {
+      display: none;
+      text-align: center;
+    }
+    @media print {
+      .control {
+        display: none;
+      }
+      .tools {
+        display: none;
+      }
+      #print-head {
+        display: block;
+      }
+      #context-menu {
+        display: none;
+      }
+    }
+
+    /* Context menu */
+    #context-menu {
+      position: fixed;
+      top: 345px;
+      left: 234px;
+      border-radius: 1em;
+      border: 2px solid black;
+      background: white;
+    }
+    #context-menu div {
+      padding: 0.5em 1em;
+      user-select: none;
+      cursor: pointer;
+    }
+    #context-menu div:nth-of-type(n + 2) {
+      border-top: 2px solid #0003;
+    }
+
+
+     /* Tool panel */
+    .tools {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 1em;
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+    }
+    .tools .button {
+      padding: 0.3em 0.6em;
+      border: 2px solid black;
+      border-radius: 1em;
+      font-family: monospace;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tools textarea {
+      width: 25vw;
+      resize: vertical;
+      margin-bottom: 1em;
+      border-radius: 30px;
+      border: 2px solid black;
+      padding: 10px 25px;
+      min-height: 20vh;
+    }
+    .tools .hints {
+      width: 25vw;
+      margin-top: 1em;
+      display: inline-block;
+      opacity: 0.8;
+    }
+    #main-tools{
+      margin-top: 1em;
+    }
+    #show-hide {
+      margin-left: 1em;
+    }
+
+    /* User control indicators */
+    .v-edge .control {
+      stroke-linecap: round;
+      stroke-width: 12;
+      cursor: pointer;
+      stroke: #d313f54d;
+    }
+    .v-box rect {
+      transition: 0.3s cubic-bezier(0.4,0,1,0.6) fill;
+    }
+    .selected rect {
+      fill: #dce7ff;
+    }
+  </style>
+</html>
