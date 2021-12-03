@@ -243,7 +243,20 @@
       SetTool("add");
     }
 
+    let meta = false;
+    window.onkeydown = (e) => {
+      if (e.key == "Meta") meta = true;
+      if (e.key == "p" && meta) {
+        e.preventDefault();
+        Print()
+      }
+    }
+    window.onkeyup = (e) => {
+      meta = false;
+    }
+
     function Print(){
+      uml.crop();
       window.print();
     }
 
@@ -260,7 +273,6 @@
     }
 
     function HideHints(){
-      console.log('xx');
       for (let el of document.getElementsByClassName("hints")) {
         el.style.setProperty("display", "none");
       }

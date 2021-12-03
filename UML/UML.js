@@ -76,6 +76,18 @@ class UMLDiagram extends VBoxesEditable {
     }
   }
 
+  crop(padding = 50){
+    let bbox = this.getBBox();
+    let o = new Vector(bbox);
+    let size = new Vector(bbox.width, bbox.height);
+    let pad = new Vector(padding, padding);
+    o = o.sub(pad);
+    size = size.add(pad.mul(2));
+    this.props = {
+      viewBox: `${o.x} ${o.y} ${size.x} ${size.y}`
+    }
+  }
+
   get center(){
     let vb = this.getAttribute("viewBox").split(" ");
     let o = new Vector(vb);
