@@ -273,8 +273,8 @@ class VUmlBox extends VBox {
           value += te.innerHTML + "\n"
         }
         value = value.replace(/[\s]*$/, "")
-        value = value.replace("&gt;", ">").replace("&lt;", "<");
-        this.value = value;
+        value = value.replace(/&gt;/g, ">").replace(/&lt;/g, "<");
+        console.log(value);
       }
     } else {
       this.innerHTML = '<rect></rect>';
@@ -324,8 +324,8 @@ class TextLines extends SvgPlus {
 
   async makeLines(string, title = true){
     this.innerHTML = ""
-    string = string.replace("<", "&lt;");
-    string = string.replace(">", "&gt;");
+    string = string.replace(/</g, "&lt;");
+    string = string.replace(/>/g, "&gt;");
     let lines = string.split("\n");
     let n = lines.length;
     for (let i = 0; i < n; i++) {
