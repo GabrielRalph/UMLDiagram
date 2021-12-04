@@ -133,6 +133,9 @@ class UMLDiagram extends SvgPlus {
         vbox.applyAttributes();
       }
     }
+    this.props = {
+      xmlns: "http://www.w3.org/2000/svg"
+    }
     super.saveSvg(name);
   }
   async openSvg(){
