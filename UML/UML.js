@@ -133,10 +133,13 @@ class UMLDiagram extends SvgPlus {
         vbox.applyAttributes();
       }
     }
+    let vb = this.getAttribute("viewBox");
+    this.crop();
     this.props = {
       xmlns: "http://www.w3.org/2000/svg"
     }
     super.saveSvg(name);
+    this.props = {viewBox: vb}
   }
   async openSvg(){
     let input = new SvgPlus("input");

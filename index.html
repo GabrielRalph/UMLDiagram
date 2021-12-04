@@ -364,8 +364,12 @@
     }
 
     async function Open(){
+      let vb = uml.getAttribute("viewBox");
       let numl = await uml.openSvgTo(uml.parentNode);
-      if (numl != null) uml = numl;
+      if (numl != null){
+        uml = numl;
+        uml.props = {viewBox: vb}
+      }
     }
 
     let meta = false;
