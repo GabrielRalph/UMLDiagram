@@ -26,7 +26,6 @@ debug.json = (json) => {
 
 let umlData = {
   "CAnimal":{
-
     methods: [
       "Walk() : void",
     ],
@@ -89,6 +88,26 @@ let atypes = [
   "aggrigation",
   "composition"
 ]
+
+async function parseJS(code){
+  let data = await fetch(code);
+  let text = await data.text();
+  let matches = text.matchAll(/class\s+(\w+)(\s+extends\s+(\w+))?\s+{/g);
+  let json = {};
+  for (let match of matches) {
+    json[match[1]] = {};
+    console.log(match[1]);
+    console.log(match[1], match[3]);
+  }
+  return json
+}
+
+// (async function (){
+//   let json = await parseJS("https://3d.svg.plus/svg-3d.js")
+//   let el = document.getElementById("uml-diagram");
+//   el.clear();
+//   el.addUmlJSON(json)
+// })();
 
 class UMLDiagram extends SvgPlus {
   constructor(el = "svg") {
@@ -185,6 +204,10 @@ class UMLDiagram extends SvgPlus {
     for (let name in data) {
       this.addUmlBox(umlJSONToString(data[name], name))
     }
+  }
+
+  async loadFromJS(url) {
+    this.addUmlJSON(await parseJS(url));
   }
 
   clear(){
