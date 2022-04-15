@@ -351,7 +351,7 @@ class TextLines extends SvgPlus {
 }
 
 class ContextMenu extends SvgPlus {
-  #fadeWaiter = null;
+  _fadeWaiter = null;
   constructor(el){
     super(el);
     this.styles = {
@@ -373,23 +373,23 @@ class ContextMenu extends SvgPlus {
   }
 
   startFader(){
-    if (this.#fadeWaiter != null) {
-      clearTimeout(this.#fadeWaiter);
+    if (this._fadeWaiter != null) {
+      clearTimeout(this._fadeWaiter);
     }
-    this.#fadeWaiter = setTimeout(() => {
-      if (this.#fadeWaiter != null) {
+    this._fadeWaiter = setTimeout(() => {
+      if (this._fadeWaiter != null) {
         this.hide();
       }
     }, 1000);
   }
 
   clearFader(){
-    clearTimeout(this.#fadeWaiter);
-    this.#fadeWaiter = null;
+    clearTimeout(this._fadeWaiter);
+    this._fadeWaiter = null;
   }
 
   hide(){
-    this.#fadeWaiter = null;
+    this._fadeWaiter = null;
     this.selected = null;
     this.styles = {
       display: "none"

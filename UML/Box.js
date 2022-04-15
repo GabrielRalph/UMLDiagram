@@ -25,17 +25,17 @@ function addBoxHASH(id){
 }
 
 class Box {
-  #hashid;
+  _hashid;
   constructor(id = null){
     this.height = 0;
     this.width = 0;
     this.pos = 0;
     this.radius = 0;
-    this.#hashid = addBoxHASH(id)
+    this._hashid = addBoxHASH(id)
   }
 
   toString(){
-    return this.#hashid
+    return this._hashid
   }
 
   pointOnRegion(r) {
